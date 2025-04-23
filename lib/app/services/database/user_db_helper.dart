@@ -1,0 +1,168 @@
+import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:pra_ujk_assesment_ppkd/app/models/user.dart';
+import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
+import 'package:sqflite/sqflite.dart';
+
+class UserDbHelper {
+  static Future<Database> openDB() async {
+    return await openDatabase(
+      join(await getDatabasesPath(), 'db_pra_ujk.db'),
+
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE IF NOT EXISTS user(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nama TEXT, email TEXT, password TEXT)',
+        );
+      },
+      version: 1
+    );
+  }
+
+  Future<bool> register(BuildContext context, User user) async {
+    final db = await openDB();
+      try {
+
+      await db.insert(
+        "user",
+        {
+          "nama": user.nama,
+          "email": user.email,
+          "password": user.password,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Berhasil Mendaftarkan Akun");
+      return true; // Berhasil
+    } catch (e) {
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Error saat register akun user: $e");
+      return false; // Gagal
+    }
+  }
+
+  Future<bool> login(BuildContext context, String email, String password) async {
+    try {
+      final user = await getUserByEmail(email);
+      CustomDialog().hide(context);
+
+      if (user == null) {
+        CustomDialog().message(context, pesan: "Akun tidak ditemukan");
+        return false;
+      }
+
+      if (user.password != password) {
+        CustomDialog().message(context, pesan: "Password salah");
+        return false;
+      }
+
+      Navigator.pushReplacementNamed(context, "/main");
+      CustomDialog().message(context, pesan: "Berhasil Login, Selamat Datang ${user.nama}");
+      return true;
+    } catch (e) {
+      CustomDialog().message(context, pesan: "Terjadi error saat login: $e");
+      return false;
+    }
+  }
+
+  Future<User?> getUserByEmail(String email) async {
+    final db = await openDB();
+    final result = await db.query(
+      'user',
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      final data = result.first;
+      return User(
+        id: data['id'] as int,
+        nama: data['nama'] as String,
+        email: data['email'] as String,
+        password: data['password'] as String,
+      );
+    }
+
+    return null; // User tidak ditemukan
+  }
+
+
+  Future<List<User>> getInvestasi() async {
+    final db = await openDB();
+    final investasiMaps = await db.query("user");
+
+    return [
+      for (
+        final {
+          'id': id as int, 
+          'nama': nama as String, 
+          'email': email as String,
+          'password': password as String,
+        } 
+        in investasiMaps)
+        User(id: id, nama: nama, email: email, password: password),
+    ];
+  }
+
+  // Future<void> updatePrio(int id, bool isPrio) async{
+  //   final db = await openDB();
+
+  //   db.update(
+  //     "investasi", 
+  //     {
+  //       "isPrio": isPrio? 0 : 1
+  //     },
+  //     where: 'id = ?',
+  //     whereArgs: [id]
+  //   );
+  // }
+  
+  // Future<bool> updateInvest(int id, 
+  // {
+  //   required String nama,
+  //   required double nominal,
+  //   required bool isInvest,
+  //   required String tglMulai,
+  //   required String deadline,
+  //   required String deskripsi
+  // }) async{
+
+  //   final db = await openDB();
+  //   try {
+  //     db.update(
+  //       "investasi", 
+  //       {
+  //         'nama': nama, 
+  //         'nominal': nominal,
+  //         'deskripsi': deskripsi,
+  //         'tglMulai': tglMulai,
+  //         'deadline': deadline,
+  //         'isInvest': isInvest ? 1 : 0,
+  //       },
+  //       where: 'id = ?',
+  //       whereArgs: [id]
+  //     );
+  //     print("Berhasil update data");
+
+  //     return true;
+      
+  //   } catch (e) {
+  //     print("gagal update data : $e");
+  //     return false;
+  //   }
+  // }
+
+  // Future<void> deleteInvestasi(int id) async{
+  //   final db = await openDB();
+
+  //   db.delete(
+  //     "investasi",
+  //     where: 'id = ?',
+  //     whereArgs: [id]
+  //   );
+  // }
+
+
+}
