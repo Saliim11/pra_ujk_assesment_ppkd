@@ -13,9 +13,24 @@ import 'package:pra_ujk_assesment_ppkd/app/views/main/widgets/profile_sheet.dart
 import 'package:pra_ujk_assesment_ppkd/app/views/main/widgets/tanggal_waktu.dart';
 import 'package:provider/provider.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.microtask(() async {
+      await Provider.of<AttendanceProvider>(context, listen: false).getAbsensiUser();
+
+    }
+      );
+  }
   @override
   Widget build(BuildContext context) {
     final profileProv = Provider.of<ProfileProvider>(context);
@@ -30,6 +45,7 @@ class MainPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
+        title: Text("Hai, ${user.nama}", style: TextStyle(color: Colors.white),),
         backgroundColor: AppColors.primary,
         actions: [
           GestureDetector(
@@ -37,8 +53,8 @@ class MainPage extends StatelessWidget {
               showProfileSheet(
                 context, 
                 profileProv,
-                name: user.nama, 
-                email: user.email);
+                authProv,
+                user: user);
             },
             child: CircleAvatar(
               backgroundColor: AppColors.background,
@@ -74,11 +90,15 @@ class MainPage extends StatelessWidget {
         onPressed: () async{
           CustomDialog().loading(context);
           await locProv.ambilLokasi();
+          
           CustomDialog().hide(context);
 
           final lokasi = locProv.lokasi;
           final formatter = DateFormat('dd-MM-yyyy HH:mm:ss');
           final waktu = formatter.format(DateTime.now());
+
+          final sudahCheckin = attendProv.checkin;
+          final sudahCheckOut = attendProv.checkout;
 
           showModalBottomSheet(
             context: context, 
@@ -93,7 +113,8 @@ class MainPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {
+                            onPressed: sudahCheckin ?
+                            () {
                               showDialog(
                                 context: context, 
                                 builder: (context) {
@@ -104,7 +125,9 @@ class MainPage extends StatelessWidget {
                                     actions: [           
                                       ElevatedButton(
                                         onPressed: () async{
-                                          
+                                          final firstId = attendProv.list.first.id;
+                                          CustomDialog().loading(context);
+                                          await attendProv.checkoutUser(context, firstId!, waktu, lokasi);
                                         }, 
                                         style: AppBtnStyle.merah,
                                         child: Text("Check out")
@@ -113,7 +136,8 @@ class MainPage extends StatelessWidget {
                                   );
                                 },
                               );
-                            },
+                            }
+                            : null,
                             icon: const Icon(Icons.logout, color: Colors.white),
                             label: const Text("Check-out"),
                             style: AppBtnStyle.merah
@@ -122,7 +146,8 @@ class MainPage extends StatelessWidget {
                         SizedBox(width: 10),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {
+                            onPressed: !sudahCheckin ?
+                            () {
                               showDialog(
                                 context: context, 
                                 builder: (context) {
@@ -143,7 +168,8 @@ class MainPage extends StatelessWidget {
                                   );
                                 },
                               );
-                            },
+                            }
+                            : null,
                             icon: const Icon(Icons.login, color: Colors.white),
                             label: const Text("Check-In"),
                             style: AppBtnStyle.hijau

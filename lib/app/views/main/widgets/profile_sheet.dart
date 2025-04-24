@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pra_ujk_assesment_ppkd/app/models/user.dart';
+import 'package:pra_ujk_assesment_ppkd/app/services/providers/auth_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/providers/profile_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/shared_preferences/prefs_handler.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/colors/app_colors.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/styles/app_btn_style.dart';
+import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
+import 'package:provider/provider.dart';
 
-void showProfileSheet(BuildContext context, ProfileProvider prov, {
-  required String name,
-  required String email,
+void showProfileSheet(BuildContext context, ProfileProvider prov, AuthProvider authProv, {
+  required User user,
 }) {
   showGeneralDialog(
     context: context,
@@ -29,11 +32,11 @@ void showProfileSheet(BuildContext context, ProfileProvider prov, {
                 Center(child: Text("My Profile", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColors.textPrimary))),
                 SizedBox(height: 10),
                 Text("Nama", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                Text(name, style: TextStyle(color: AppColors.textSecondary)),
+                Text(user.nama, style: TextStyle(color: AppColors.textSecondary)),
                 SizedBox(height: 10),
 
                 Text("Email", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                Text(email, style: TextStyle(color: AppColors.textSecondary)),
+                Text(user.email, style: TextStyle(color: AppColors.textSecondary)),
 
                 SizedBox(height: 20),
                 Row(
@@ -43,7 +46,7 @@ void showProfileSheet(BuildContext context, ProfileProvider prov, {
                       width: 100,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          final _nameController = TextEditingController(text: name);
+                          final _nameController = TextEditingController(text: user.nama);
 
                           showDialog(
                             context: context,
@@ -83,9 +86,9 @@ void showProfileSheet(BuildContext context, ProfileProvider prov, {
                                   ElevatedButton(
                                     onPressed: () async{
                                       final newName = _nameController.text.trim();
-                                      if (newName.isNotEmpty && newName != name) {
-                                        // CustomDialog().loading(context);
-                                        // await prov.updateProfileUser(context, nama: newName);
+                                      if (newName.isNotEmpty && newName != user.nama) {
+                                        CustomDialog().loading(context);
+                                        await authProv.editNama(context, user.id!, newName, user.email);
                                       }
                                     },
                                     style: AppBtnStyle.normalS,

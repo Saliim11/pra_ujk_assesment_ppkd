@@ -21,7 +21,7 @@ class AuthProvider with ChangeNotifier{
 
   Future<void> login(BuildContext context, {required String email, required String password}) async{
     await getUser(email);
-    notifyListeners();
+    
     try {
 
       CustomDialog().hide(context);
@@ -42,9 +42,17 @@ class AuthProvider with ChangeNotifier{
   Future<void> getUser(String email) async{
     try {
       _user = await dbUser.getUserByEmail(email);
-        
+      notifyListeners();
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<void> editNama(BuildContext context, int id, String nama, String email) async{
+    bool result = await dbUser.editNama(context, id, nama);
+
+    if (result) {
+      await getUser(email);
     }
   }
 }

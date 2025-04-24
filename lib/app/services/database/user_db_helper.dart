@@ -94,6 +94,32 @@ class UserDbHelper {
     return null; // User tidak ditemukan
   }
 
+  Future<bool> editNama(BuildContext context, int id, String nama) async {
+    final db = await openDB();
+    try {
+      await db.update(
+        'user',
+        {
+          'nama' : nama,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Berhasil update nama menjadi $nama");
+      return true;
+    } catch (e) {
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Error saat update nama: $e");
+      return false;
+    }
+  }
+
   Future<bool> checkin(BuildContext context, Absensi absen) async {
     final db = await openDB();
       try {
@@ -127,9 +153,10 @@ class UserDbHelper {
   Future<bool> checkout(BuildContext context, int id, String checkoutTime, String checkoutLoc) async {
     final db = await openDB();
     try {
-      final updated = await db.update(
+      await db.update(
         'absensi',
         {
+          'status' : 'checkout',
           'checkout': checkoutTime,
           'checkout_loc': checkoutLoc,
         },
@@ -137,16 +164,14 @@ class UserDbHelper {
         whereArgs: [id],
       );
 
-      if (updated > 0) {
-        CustomDialog().hide(context);
-        CustomDialog().message(context, pesan: "Berhasil checkout pada $checkoutTime");
-        return true;
-      } else {
-        CustomDialog().hide(context);
-        CustomDialog().message(context, pesan: "Gagal checkout: data tidak ditemukan");
-        return false;
-      }
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Berhasil checkout pada $checkoutTime");
+      return true;
     } catch (e) {
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
       CustomDialog().hide(context);
       CustomDialog().message(context, pesan: "Error saat checkout: $e");
       return false;
@@ -171,54 +196,6 @@ class UserDbHelper {
         Absensi(id: id, status: status, checkin: checkin, checkin_loc: checkin_loc, checkout: checkout, checkout_loc: checkout_loc)
     ];
   }
-
-  // Future<void> updatePrio(int id, bool isPrio) async{
-  //   final db = await openDB();
-
-  //   db.update(
-  //     "investasi", 
-  //     {
-  //       "isPrio": isPrio? 0 : 1
-  //     },
-  //     where: 'id = ?',
-  //     whereArgs: [id]
-  //   );
-  // }
-  
-  // Future<bool> updateInvest(int id, 
-  // {
-  //   required String nama,
-  //   required double nominal,
-  //   required bool isInvest,
-  //   required String tglMulai,
-  //   required String deadline,
-  //   required String deskripsi
-  // }) async{
-
-  //   final db = await openDB();
-  //   try {
-  //     db.update(
-  //       "investasi", 
-  //       {
-  //         'nama': nama, 
-  //         'nominal': nominal,
-  //         'deskripsi': deskripsi,
-  //         'tglMulai': tglMulai,
-  //         'deadline': deadline,
-  //         'isInvest': isInvest ? 1 : 0,
-  //       },
-  //       where: 'id = ?',
-  //       whereArgs: [id]
-  //     );
-  //     print("Berhasil update data");
-
-  //     return true;
-      
-  //   } catch (e) {
-  //     print("gagal update data : $e");
-  //     return false;
-  //   }
-  // }
 
   Future<void> deleteAbsen(int id) async{
     final db = await openDB();

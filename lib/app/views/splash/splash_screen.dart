@@ -26,7 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
       if (email.isEmpty || email == "") {
         Navigator.pushReplacementNamed(context, "/login");
       } else {
-        Provider.of<AuthProvider>(context).getUser(email);
+        Future.microtask(() => 
+        Provider.of<AuthProvider>(context, listen: false).getUser(email)
+      );
         Navigator.pushReplacementNamed(context, "/main");
       }
     });
