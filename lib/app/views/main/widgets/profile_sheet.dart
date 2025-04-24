@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/providers/profile_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/shared_preferences/prefs_handler.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/colors/app_colors.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/styles/app_btn_style.dart';
-import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
 
 void showProfileSheet(BuildContext context, ProfileProvider prov, {
   required String name,

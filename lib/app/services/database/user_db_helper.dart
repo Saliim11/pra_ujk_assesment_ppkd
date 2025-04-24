@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:pra_ujk_assesment_ppkd/app/models/absensi.dart';
 import 'package:pra_ujk_assesment_ppkd/app/models/user.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,7 +15,12 @@ class UserDbHelper {
           'CREATE TABLE IF NOT EXISTS user(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nama TEXT, email TEXT, password TEXT)',
         );
       },
-      version: 1
+      onUpgrade: (db, oldVersion, newVersion) {
+        return db.execute(
+          'CREATE TABLE IF NOT EXISTS absensi(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, status TEXT, checkin TEXT, checkin_loc TEXT, checkout TEXT, checkout_loc TEXT)',
+        );
+      },
+      version: 2
     );
   }
 
@@ -88,21 +94,48 @@ class UserDbHelper {
     return null; // User tidak ditemukan
   }
 
-
-  Future<List<User>> getInvestasi() async {
+  Future<bool> checkin(BuildContext context, Absensi absen) async {
     final db = await openDB();
-    final investasiMaps = await db.query("user");
+      try {
+
+      await db.insert(
+        "absensi",
+        {
+          "status": absen.status,
+          "checkin": absen.checkin,
+          "checkin_loc": absen.checkin_loc,
+          "checkout": absen.checkout,
+          "checkout_loc": absen.checkout_loc
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Berhasil check in pada ${absen.checkin}");
+      return true; // Berhasil
+    } catch (e) {
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Error saat checkin: $e");
+      return false; // Gagal
+    }
+  }
+
+  Future<List<Absensi>> getAbsensi() async {
+    final db = await openDB();
+    final absensi = await db.query("absensi");
 
     return [
       for (
         final {
-          'id': id as int, 
-          'nama': nama as String, 
-          'email': email as String,
-          'password': password as String,
+          "id": id as int,
+          "status": status as String,
+          "checkin": checkin as String,
+          "checkin_loc": checkin_loc as String,
+          "checkout": checkout as String,
+          "checkout_loc": checkout_loc as String
         } 
-        in investasiMaps)
-        User(id: id, nama: nama, email: email, password: password),
+        in absensi)
+        Absensi(id: id, status: status, checkin: checkin, checkin_loc: checkin_loc, checkout: checkout, checkout_loc: checkout_loc)
     ];
   }
 

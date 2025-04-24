@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pra_ujk_assesment_ppkd/app/models/absensi.dart';
+import 'package:pra_ujk_assesment_ppkd/app/services/providers/attendance_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/providers/auth_provider.dart';
+import 'package:pra_ujk_assesment_ppkd/app/services/providers/location_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/providers/profile_provider.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/colors/app_colors.dart';
+import 'package:pra_ujk_assesment_ppkd/app/utils/styles/app_btn_style.dart';
+import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
 import 'package:pra_ujk_assesment_ppkd/app/views/main/widgets/profile_sheet.dart';
 import 'package:pra_ujk_assesment_ppkd/app/views/main/widgets/tanggal_waktu.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +19,8 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final profileProv = Provider.of<ProfileProvider>(context);
     final authProv = Provider.of<AuthProvider>(context);
+    final locProv = Provider.of<LocationProvider>(context);
+    final attendProv = Provider.of<AttendanceProvider>(context);
 
     final user = authProv.user;
 
@@ -93,6 +101,97 @@ class MainPage extends StatelessWidget {
             ),
           )
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async{
+          CustomDialog().loading(context);
+          await locProv.ambilLokasi();
+          CustomDialog().hide(context);
+
+          final lokasi = locProv.lokasi;
+          final formatter = DateFormat('dd-MM-yyyy HH:mm:ss');
+          final waktu = formatter.format(DateTime.now());
+
+          showModalBottomSheet(
+            context: context, 
+            builder: (context) {
+              return Container(
+                padding: EdgeInsets.all(16),
+                width: double.infinity,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context, 
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Check out Kantor"),
+                                    content: Text("Lokasi anda: $lokasi"),
+                                    actionsAlignment: MainAxisAlignment.center,
+                                    actions: [           
+                                      ElevatedButton(
+                                        onPressed: () async{
+                                          
+                                        }, 
+                                        style: AppBtnStyle.merah,
+                                        child: Text("Check out")
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.logout, color: Colors.white),
+                            label: const Text("Check-out"),
+                            style: AppBtnStyle.merah
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context, 
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Check in Kantor"),
+                                    content: Text("Lokasi anda: $lokasi"),
+                                    actionsAlignment: MainAxisAlignment.center,
+                                    actions: [  
+                                      ElevatedButton(
+                                        onPressed: () async{
+                                          CustomDialog().loading(context);
+                                          await attendProv.checkinUser(context, Absensi(status: "checkin", checkin: waktu, checkin_loc: lokasi, checkout: "-", checkout_loc: "-"));
+                                        }, 
+                                        style: AppBtnStyle.hijau,
+                                        child: Text("Check in")
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.login, color: Colors.white),
+                            label: const Text("Check-In"),
+                            style: AppBtnStyle.hijau
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        child: Icon(Icons.event_available_outlined, color: Colors.white,),
+        backgroundColor: AppColors.primary,
       ),
     );
   }
