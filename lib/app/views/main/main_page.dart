@@ -98,7 +98,6 @@ class _MainPageState extends State<MainPage> {
           final waktu = formatter.format(DateTime.now());
 
           final sudahCheckin = attendProv.checkin;
-          final sudahCheckOut = attendProv.checkout;
 
           showModalBottomSheet(
             context: context, 

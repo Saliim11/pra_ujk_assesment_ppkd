@@ -6,7 +6,6 @@ import 'package:pra_ujk_assesment_ppkd/app/services/shared_preferences/prefs_han
 import 'package:pra_ujk_assesment_ppkd/app/utils/colors/app_colors.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/styles/app_btn_style.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
-import 'package:provider/provider.dart';
 
 void showProfileSheet(BuildContext context, ProfileProvider prov, AuthProvider authProv, {
   required User user,

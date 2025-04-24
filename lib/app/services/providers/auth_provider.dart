@@ -7,7 +7,7 @@ import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
 class AuthProvider with ChangeNotifier{
   UserDbHelper dbUser = UserDbHelper();
 
-  User? _user;
+  User? _user = User(nama: "unknown", email: "unknown", password: "unknown");
 
   User get user => _user!;
 

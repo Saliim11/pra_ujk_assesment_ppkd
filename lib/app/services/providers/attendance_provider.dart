@@ -13,10 +13,8 @@ class AttendanceProvider with ChangeNotifier {
   List<Absensi> get list => _list;
 
   bool _checkin = false;
-  bool _checkout = false;
 
   bool get checkin => _checkin;
-  bool get checkout => _checkout;
 
   Future<void> getAbsensiUser() async{
     _list = await db.getAbsensi();
@@ -44,7 +42,6 @@ class AttendanceProvider with ChangeNotifier {
   void isSudahCheckInOut() {
     if (_list.isEmpty || _list == []) {
       _checkin = false;
-      _checkout = false;
       return;
     }
 
@@ -61,12 +58,6 @@ class AttendanceProvider with ChangeNotifier {
       _checkin = true;
     } else {
       _checkin = false;
-    }
-
-    if (first.checkout == "-") {
-      _checkout = false;
-    } else {
-      _checkout = true;
     }
     
   }
