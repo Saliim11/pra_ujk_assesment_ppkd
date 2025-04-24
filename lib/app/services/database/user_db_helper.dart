@@ -104,19 +104,52 @@ class UserDbHelper {
           "status": absen.status,
           "checkin": absen.checkin,
           "checkin_loc": absen.checkin_loc,
-          "checkout": absen.checkout,
-          "checkout_loc": absen.checkout_loc
+          "checkout": "-",
+          "checkout_loc": "-"
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
       CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
       CustomDialog().message(context, pesan: "Berhasil check in pada ${absen.checkin}");
       return true; // Berhasil
     } catch (e) {
       CustomDialog().hide(context);
+      CustomDialog().hide(context);
+      CustomDialog().hide(context);
       CustomDialog().message(context, pesan: "Error saat checkin: $e");
       return false; // Gagal
+    }
+  }
+
+  Future<bool> checkout(BuildContext context, int id, String checkoutTime, String checkoutLoc) async {
+    final db = await openDB();
+    try {
+      final updated = await db.update(
+        'absensi',
+        {
+          'checkout': checkoutTime,
+          'checkout_loc': checkoutLoc,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (updated > 0) {
+        CustomDialog().hide(context);
+        CustomDialog().message(context, pesan: "Berhasil checkout pada $checkoutTime");
+        return true;
+      } else {
+        CustomDialog().hide(context);
+        CustomDialog().message(context, pesan: "Gagal checkout: data tidak ditemukan");
+        return false;
+      }
+    } catch (e) {
+      CustomDialog().hide(context);
+      CustomDialog().message(context, pesan: "Error saat checkout: $e");
+      return false;
     }
   }
 
@@ -187,15 +220,15 @@ class UserDbHelper {
   //   }
   // }
 
-  // Future<void> deleteInvestasi(int id) async{
-  //   final db = await openDB();
+  Future<void> deleteAbsen(int id) async{
+    final db = await openDB();
 
-  //   db.delete(
-  //     "investasi",
-  //     where: 'id = ?',
-  //     whereArgs: [id]
-  //   );
-  // }
+    db.delete(
+      "absensi",
+      where: 'id = ?',
+      whereArgs: [id]
+    );
+  }
 
 
 }

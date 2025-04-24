@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefsHandler {
-  static const String _id = "id";
+  static const String _id = "email";
 
   static void saveid(String id){
     SharedPreferences.getInstance().then((value) {

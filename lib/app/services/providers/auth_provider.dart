@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pra_ujk_assesment_ppkd/app/models/user.dart';
 import 'package:pra_ujk_assesment_ppkd/app/services/database/user_db_helper.dart';
+import 'package:pra_ujk_assesment_ppkd/app/services/shared_preferences/prefs_handler.dart';
 import 'package:pra_ujk_assesment_ppkd/app/utils/widgets/dialog.dart';
 
 class AuthProvider with ChangeNotifier{
@@ -19,9 +20,9 @@ class AuthProvider with ChangeNotifier{
   }
 
   Future<void> login(BuildContext context, {required String email, required String password}) async{
+    await getUser(email);
+    notifyListeners();
     try {
-      _user = await dbUser.getUserByEmail(email);
-      notifyListeners();
 
       CustomDialog().hide(context);
 
@@ -30,10 +31,20 @@ class AuthProvider with ChangeNotifier{
         return;
       }
 
+      PrefsHandler.saveid(_user!.email);
       Navigator.pushReplacementNamed(context, "/main");
       CustomDialog().message(context, pesan: "Berhasil Login, Selamat Datang ${user.nama}");
     } catch (e) {
       CustomDialog().message(context, pesan: "Terjadi error saat login: $e");
+    }
+  }
+
+  Future<void> getUser(String email) async{
+    try {
+      _user = await dbUser.getUserByEmail(email);
+        
+    } catch (e) {
+      print(e);
     }
   }
 }
