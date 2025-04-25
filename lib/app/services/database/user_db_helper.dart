@@ -180,7 +180,7 @@ class UserDbHelper {
 
   Future<List<Absensi>> getAbsensi() async {
     final db = await openDB();
-    final absensi = await db.query("absensi");
+    final absensi = await db.query("absensi", orderBy: "checkin DESC");
 
     return [
       for (
